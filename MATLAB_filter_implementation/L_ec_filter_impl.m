@@ -43,25 +43,28 @@ a13 = [1.000000000000000,   -1.04481549985497,  0.477592250072517];
 
 %% filter implementation
 
+% load sample file
+[samples, Fs] = audioread("20to20000Hz_sweep_48000SR.wav");
+
 % buffer initialization
-y1 = zeros(3,1);
-x1 = zeros(3,1);
-y2 = zeros(3,1); 
-x2 = zeros(3,1);
-y3 = zeros(3,1); 
-x3 = zeros(3,1);
-y4 = zeros(3,1); 
-x4 = zeros(3,1);
-y5 = zeros(3,1); 
-x5 = zeros(3,1);
-y6 = zeros(3,1); 
-x6 = zeros(3,1);
-y7 = zeros(3,1); 
-x7 = zeros(3,1);
-y8 = zeros(3,1); 
-x8 = zeros(3,1);
-y9 = zeros(3,1); 
-x9 = zeros(3,1);
+y1  = zeros(3,1);
+x1  = zeros(3,1);
+y2  = zeros(3,1); 
+x2  = zeros(3,1);
+y3  = zeros(3,1); 
+x3  = zeros(3,1);
+y4  = zeros(3,1); 
+x4  = zeros(3,1);
+y5  = zeros(3,1); 
+x5  = zeros(3,1);
+y6  = zeros(3,1); 
+x6  = zeros(3,1);
+y7  = zeros(3,1); 
+x7  = zeros(3,1);
+y8  = zeros(3,1); 
+x8  = zeros(3,1);
+y9  = zeros(3,1); 
+x9  = zeros(3,1);
 y10 = zeros(3,1); 
 x10 = zeros(3,1);
 y11 = zeros(3,1); 
@@ -71,44 +74,97 @@ x12 = zeros(3,1);
 y13 = zeros(3,1); 
 x13 = zeros(3,1);
 
-% load sample file
-[samples, Fs] = audioread("20to20000Hz_sweep_48000SR.wav");
 
-%samples = [1:20];
 output = zeros(size(samples));
 
 % cascaded output calculation
 for n = 1:length(samples)
-    % delay indexes
-    z = circularBuffer_read_indexes(3, n);
-    z0 = z(1); z1 = z(2); z2 = z(3); % (z0 = no delay)
-
+    z_indexes = circularBuffer_read_indexes(3, n);
+    z   = z_indexes(1); 
+    z_1 = z_indexes(2);
+    z_2 = z_indexes(3);
+    
     f_out = samples(n); % initialization
     
     % filter 1 (high pass)
-    x1(z0) = f_out;
-    y1(z2) = b1(1)*x1(z2) - b1(2)*x1(z1) - b1(3)*x1(z0) + a1(2)*y1(z1) + a1(3)*y1(z0);
-    f_out = y1(z2);
+    x1(z) = f_out;
+    [x1, y1] = hp_filter(x1, y1, a1, b1, z_indexes);
+    f_out = y1(z);
 
     % filter 2 (notch)
-    x2(z0) = f_out;
-    y2(z2) = b2(1)*x2(z2) - b2(2)*x2(z1) + b2(3)*x2(z0) + a2(2)*y2(z1) - a2(3)*y2(z0);
-    %disp(x2(z0))
-    %disp(y2(z2))
-    %disp('  -------')
-    f_out = y2(z2);
+    x2(z) = f_out;
+    [x2, y2] = pk_filter(x2, y2, a2, b2, z_indexes);
+    f_out = y2(z);
 
-    %x3(z0) = f_out;
-    %y3(z2) = b3(1)*x3(z2) - b3(2)*x3(z1) + b3(3)*x3(z0) + a3(2)*y3(z1) - a3(3)*y3(z0);
-    %f_out = y3(z2);
+    % filter 3 (notch)
+    x3(z) = f_out;
+    [x3, y3] = pk_filter(x3, y3, a3, b3, z_indexes);
+    f_out = y3(z);
+
+    % filter 4 (notch)
+    x4(z) = f_out;
+    [x4, y4] = pk_filter(x4, y4, a4, b4, z_indexes);
+    f_out = y4(z);
+
+    % filter 5 (notch)
+    x5(z) = f_out;
+    [x5, y5] = pk_filter(x5, y5, a5, b5, z_indexes);
+    f_out = y5(z);
+
+    % filter 6 (notch)
+    x6(z) = f_out;
+    [x6, y6] = pk_filter(x6, y6, a6, b6, z_indexes);
+    f_out = y6(z);
+
+    % filter 7 (notch)
+    x7(z) = f_out;
+    [x7, y7] = pk_filter(x7, y7, a7, b7, z_indexes);
+    f_out = y7(z);
+
+    % filter 8 (notch)
+    x8(z) = f_out;
+    [x8, y8] = pk_filter(x8, y8, a8, b8, z_indexes);
+    f_out = y8(z);
+
+    % filter 9 (notch)
+    x9(z) = f_out;
+    [x9, y9] = pk_filter(x9, y9, a9, b9, z_indexes);
+    f_out = y9(z);
+
+    % filter 10 (notch)
+    x10(z) = f_out;
+    [x10, y10] = pk_filter(x10, y10, a10, b10, z_indexes);
+    f_out = y10(z);
+
+    % filter 11 (notch)
+    x11(z) = f_out;
+    [x11, y11] = pk_filter(x11, y11, a11, b11, z_indexes);
+    f_out = y11(z);
+    
+    % filter 12 (notch)
+    x12(z) = f_out;
+    [x12, y12] = pk_filter(x12, y12, a12, b12, z_indexes);
+    f_out = y12(z);
+
+    % filter 13 (notch)
+    x13(z) = f_out;
+    [x13, y13] = pk_filter(x13, y13, a13, b13, z_indexes);
+    f_out = y13(z);
 
     output(n) = f_out; % final filter output
 end
 
 figure
 plot(1:length(samples), samples)
+title('original')
 figure
 plot(1:length(output), output)
+title('filtered')
+figure
+plot(1:length(output), filter(b2,a2,samples))
+title('MATLAB filtered')
+
+sound(output, Fs);
 
 %% plot results
 figure
@@ -131,6 +187,32 @@ plot(f,filtered_power)
 xlabel('Frequency')
 ylabel('filtered_power')
 
+
+%% filters
+
+function [x, y] = hp_filter(x, y, a, b, z_indexes)
+    z   = z_indexes(1); 
+    z_1 = z_indexes(2);
+    z_2 = z_indexes(3);
+    %
+    a1 = a(2); a2 = a(3);
+    b0 = b(1); b1 = b(2); b2 = b(3);
+    B = b0*x(z) + b1*x(z_1) + b2*x(z_2);
+    A = - a1*y(z_1) - a2*y(z_2);
+    y(z) = B + A;
+end
+
+function [x, y] = pk_filter(x, y, a, b, z_indexes)
+    z   = z_indexes(1); 
+    z_1 = z_indexes(2);
+    z_2 = z_indexes(3);
+    %
+    a1 = a(2); a2 = a(3);
+    b0 = b(1); b1 = b(2); b2 = b(3);
+    B = + b0*x(z) + b1*x(z_1) + b2*x(z_2);
+    A = - a1*y(z_1) - a2*y(z_2);
+    y(z) = B + A;
+end
 
 %% buffer function
 
